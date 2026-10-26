@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>地球 ONLINE · 任务线 | 做些具体的小事</title>
+<meta name="description" content="72 件大学生能做到的具体小事，做完打个勾；36 个成就不靠自己点，只由系统看你真的做过什么。">
+<meta name="theme-color" content="#f7efdd">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='12' width='76' height='76' fill='none' stroke='%232b2116' stroke-width='8'/><rect x='34' y='34' width='32' height='32' fill='%23f0a51e'/></svg>">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pixel.css">
+</head>
+<body class="pixel">
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="aura" aria-hidden="true"></div>
+
+<!-- ══════════ 顶部 HUD ══════════ -->
+<header class="hud">
+  <div class="hud-inner">
+    <a class="brand" href="#" data-view-link="home">
+      <span class="brand-orb" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="none" stroke="url(#g1)" stroke-width="1.6"/><ellipse cx="20" cy="20" rx="19" ry="7" fill="none" stroke="rgba(43,33,22,.25)" stroke-width="1"/><circle cx="33" cy="14" r="3" fill="#f0a51e"/><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1f9e96"/><stop offset="1" stop-color="#f0a51e"/></linearGradient></defs></svg>
+      </span>
+      <span class="brand-txt"><b>地球 ONLINE</b><i>任务线 · 成就</i></span>
+    </a>
+
+    <div class="hud-progress">
+      <div class="hud-bar"><i id="hudBar"></i></div>
+      <div class="hud-meta">
+        <span id="hudCount">任务 0 / 72</span>
+        <span class="dot">·</span>
+        <span id="hudPct">0%</span>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <button class="lvl-chip" id="hudLevel" title="已解锁成就">
+        <span class="lvl-num" id="hudAchNum">0/36</span>
+        <span class="lvl-name">成就</span>
+      </button>
+      <button class="icon-btn" id="btnSound" title="音效开关" aria-pressed="true">♪</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ 视图切换 ══════════ -->
+<nav class="tabs" id="tabs">
+  <button class="tab is-active" data-view="home">主页</button>
+  <button class="tab" data-view="quest">任务线</button>
+  <button class="tab" data-view="dex">成就</button>
+  <button class="tab" data-view="save">存档</button>
+</nav>
+
+<main>
+
+<!-- ══════════ 主页 ══════════ -->
+<section class="view is-active" id="view-home">
+  <div class="hero">
+    <p class="eyebrow"><span class="live-dot"></span>SERVER · EARTH ／ SHARD · CN-01 ／ 你的角色：<b id="heroName">同学</b></p>
+    <h1 class="hero-title">这里不考你的人生成就，<br>只记录你做过的具体小事。</h1>
+    <p class="hero-sub" id="heroSub">84 件大学生真的能做到的小事，做完自己打个勾。<br>42 个成就不能自己点——系统看你真的做过了什么，才替你点亮。</p>
+
+    <div class="hero-grid">
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+          <circle class="ring-bg" cx="120" cy="120" r="104"/>
+          <circle class="ring-fg" id="ringFg" cx="120" cy="120" r="104"/>
+        </svg>
+        <div class="ring-center">
+          <b id="ringPct">0<span>%</span></b>
+          <i>任务完成度</i>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-k">已完成任务</span>
+          <b class="stat-v"><em id="statUnlocked">0</em><small>/ 72</small></b>
+        </div>
+        <div class="stat">
+          <span class="stat-k">已解锁成就</span>
+          <b class="stat-v"><em id="statPoints">0</em><small>/ 36</small></b>
+        </div>
+        <div class="stat">
+          <span class="stat-k">迈过的方向</span>
+          <b class="stat-v"><em id="statRank">0</em><small id="statRankMax">/ 9</small></b>
+        </div>
+        <div class="stat">
+          <span class="stat-k">还差</span>
+          <b class="stat-v"><em id="statLeft">72</em><small>件</small></b>
+        </div>
+        <div class="stat stat--wide">
+          <span class="stat-k">最近达成</span>
+          <b class="stat-v stat-v--sm" id="statRarest">还没有成就，先去完成一件小事</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <button class="btn btn--primary" data-go="quest">去看看任务线</button>
+      <button class="btn" data-go="dex">看看成就条件</button>
+    </div>
+  </div>
+
+  <div class="home-cols">
+    <article class="panel today" id="todayCard">
+      <header class="panel-head">
+        <span class="panel-kicker">TODAY</span>
+        <h2>今日一件小事</h2>
+      </header>
+      <div class="today-body" id="todayBody"><!-- injected --></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <span class="panel-kicker">RECENT</span>
+        <h2>最近达成的成就</h2>
+      </header>
+      <ul class="recent" id="recentList"><!-- injected --></ul>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <span class="panel-kicker">PROGRESS</span>
+        <h2 id="catBarsTitle">九个方向</h2>
+      </header>
+      <ul class="tierbars" id="tierBars"><!-- injected --></ul>
+    </article>
+  </div>
+
+  <p class="footnote">“成就不是金币，是你回头能认出自己走过哪一步。” —— 配图整理自抖音 @地球online成就收集家，任务与成就规则为本页面原创。</p>
+</section>
+
+<!-- ══════════ 任务线（FTB 风格任务书） ══════════ -->
+<section class="view" id="view-quest">
+  <div class="view-head">
+    <p class="eyebrow">QUEST BOOK</p>
+    <h1 class="view-title" id="questTitle">九方向 · 任务书</h1>
+    <p class="view-sub">每个方块是一件具体的小事，做到就点一下打勾。系统会看你完成的任务，自动点亮对应的成就。拖动空白处平移，滚轮缩放；点「编辑」可增删任务。</p>
+  </div>
+
+  <div class="qb" id="qb">
+    <aside class="qb-rail" id="qbRail"><!-- injected --></aside>
+    <div class="qb-stage">
+      <div class="qb-viewport" id="qbViewport">
+        <div class="qb-canvas" id="qbCanvas"><!-- injected --></div>
+      </div>
+      <div class="qb-hint" id="qbHint">拖动平移 · 滚轮缩放</div>
+      <div class="qb-tools">
+        <button class="qb-tool" id="qbOut" title="缩小" aria-label="缩小">−</button>
+        <button class="qb-tool" id="qbIn" title="放大" aria-label="放大">+</button>
+        <button class="qb-tool qb-tool--wide" id="qbFit" title="适配当前方向">适配</button>
+        <button class="qb-tool qb-tool--wide" id="qbAdd" title="新建一个任务" hidden>＋ 新任务</button>
+        <button class="qb-tool qb-tool--wide" id="qbEdit" title="打开编辑模式">编辑</button>
+      </div>
+      <div class="qb-legend">
+        <span><i class="lg lg--on"></i>已完成</span>
+        <span><i class="lg lg--off"></i>待完成</span>
+      </div>
+
+      <aside class="qb-editor" id="qbEditor" hidden>
+        <div class="qbe-head">
+          <b id="qbeTitle">编辑任务</b>
+          <button class="qbe-x" id="qbeClose" type="button" aria-label="关闭">✕</button>
+        </div>
+        <div class="qbe-body">
+          <label class="qbe-f">任务名称<input id="qbeName" type="text" maxlength="24" placeholder="例：连续一周吃早饭"></label>
+          <label class="qbe-f">怎么算完成<textarea id="qbeDesc" rows="3" maxlength="120" placeholder="写清楚什么情况算做到了，别写玄的"></textarea></label>
+          <div class="qbe-row">
+            <label class="qbe-f">方向<select id="qbeTier"></select></label>
+            <label class="qbe-f">难度 1–3<input id="qbeRate" type="number" min="1" max="3" step="1"></label>
+          </div>
+          <label class="qbe-f">点数<input id="qbePts" type="number" min="1" max="999" step="5"></label>
+          <p class="qbe-tip">编辑模式下可以直接拖动方块摆位置。系统只统计你打勾的任务，任务删掉后对应进度也会跟着变。</p>
+        </div>
+        <div class="qbe-foot">
+          <button class="btn btn--primary" id="qbeSave" type="button">保存</button>
+          <button class="btn btn--danger" id="qbeDel" type="button">删除</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 成就 ══════════ -->
+<section class="view" id="view-dex">
+  <div class="view-head">
+    <p class="eyebrow">ACHIEVEMENTS</p>
+    <h1 class="view-title">成就</h1>
+    <p class="view-sub">成就不需要你点。它只看你完成了哪些任务——条件够了自动点亮，任务取消后也会随之熄灭。右键或双击可以看规则。</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5L18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="search" type="search" placeholder="搜索成就名称或条件…" autocomplete="off">
+    </div>
+    <div class="chips" id="tierChips"></div>
+    <div class="chips chips--sm" id="stateChips">
+      <button class="chip is-on" data-state="all">全部</button>
+      <button class="chip" data-state="locked">未达成</button>
+      <button class="chip" data-state="unlocked">已达成</button>
+    </div>
+    <label class="sortbox">
+      排序
+      <select id="sort">
+        <option value="orig">原序</option>
+        <option value="near">快达成</option>
+        <option value="cat">按方向</option>
+        <option value="name">名称</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="grid" id="grid"><!-- injected --></div>
+  <p class="empty" id="empty" hidden>没有符合条件的成就，换个关键词试试。</p>
+</section>
+
+<!-- ══════════ 存档 ══════════ -->
+<section class="view" id="view-save">
+  <div class="view-head">
+    <p class="eyebrow">SAVE FILE</p>
+    <h1 class="view-title">我的存档</h1>
+    <p class="view-sub">数据保存在浏览器 localStorage 中。换设备时用「导出 / 导入」搬运你的存档。</p>
+  </div>
+
+  <div class="save-grid">
+    <article class="panel">
+      <header class="panel-head"><span class="panel-kicker">PLAYER</span><h2>角色档案</h2></header>
+      <label class="field">
+        <span>角色名</span>
+        <input id="playerName" maxlength="16" placeholder="同学">
+      </label>
+      <div class="mini-stats">
+        <div><span>已完成任务</span><b id="saveUnlocked">0</b></div>
+        <div><span>已解锁成就</span><b id="savePoints">0</b></div>
+        <div><span>任务完成度</span><b id="savePct">0%</b></div>
+        <div><span>迈过方向</span><b id="saveRank">0 / 8</b></div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head"><span class="panel-kicker">TOOLS</span><h2>存档操作</h2></header>
+      <div class="btns">
+        <button class="btn" id="btnExport">导出存档</button>
+        <button class="btn" id="btnImport">导入存档</button>
+        <button class="btn" id="btnPoster">生成战报图</button>
+        <button class="btn" id="btnResetBook">复原任务书</button>
+        <button class="btn btn--danger" id="btnReset">清空全部进度</button>
+      </div>
+      <textarea id="ioArea" class="io" spellcheck="false" placeholder="导出的存档会出现在这里；把别人给你的存档粘贴进来后点「导入存档」。"></textarea>
+      <p class="hint" id="ioHint"></p>
+    </article>
+
+    <article class="panel panel--wide">
+      <header class="panel-head"><span class="panel-kicker">RULES</span><h2>玩法说明</h2></header>
+      <ul class="rules">
+        <li><b>两条线：</b>任务是你能自己打勾的具体小事（含考研的数学、英语）；成就不能自己点，只有条件满足时系统才点亮它。</li>
+        <li><b>成就怎么判：</b>规则只看你完成了哪些任务——某个方向完成 N 件、某几件指定任务都完成、总任务数达标、或每个方向都迈出一步。</li>
+        <li><b>会跟着熄灭：</b>成就不是永久印章。取消对应任务后，条件不再满足，它就会熄灭——这样成就才始终对得上你现在的记录。</li>
+        <li><b>今日一件小事：</b>每天从你还没完成的任务里抽一件，做不到也没关系，明天换一件。</li>
+        <li><b>原则：</b>这里是自我记录，不是考试。写清楚什么算做到，比写得好听重要。</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <span>地球 ONLINE · 任务线</span>
+  <span class="sep">／</span>
+  <span>配图整理自抖音 <b>@地球online成就收集家</b>；任务与成就规则为本页面原创</span>
+</footer>
+
+<!-- ══════════ 浮层 ══════════ -->
+<div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card">
+    <button class="modal-x" id="modalX" aria-label="关闭">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
